@@ -244,6 +244,7 @@ export default function Index({
          hora_servidor: formatHour30secs(timestamp.createdAt),
          hora_telefono: formatHour30secs(timestamp.timestamp_telefono),
          unidad: unidad[0].numero,
+         unidad_trampa: unidad[0].nombre_conductor,
          ruta: ruta[0].nombre,
          fiscal: fiscal[0].ubicacion,
        };
@@ -255,6 +256,7 @@ export default function Index({
          hora_servidor: formatHour(timestamp.timestamp_salida),
          hora_telefono: formatHour(timestamp.timestamp_telefono),
          unidad: unidad[0].numero,
+         unidad_trampa: unidad[0].nombre_conductor,
          ruta: ruta[0].nombre,
          fiscal: fiscal[0].ubicacion,
         };
@@ -267,6 +269,46 @@ export default function Index({
   });
 
   rows.sort((a: any, b: any) => new Date(a.hora_date).getTime() - new Date(b.hora_date).getTime());
+
+// columna con unidades trampa
+
+let columns2 = [
+    {
+      key: "hora_servidor",
+      label: "Hora Servidor",
+    },
+    {
+      key: "hora_telefono",
+      label: "Hora Teléfono",
+    },
+    {
+      key: "unidad",
+      label: "Unidad",
+    },
+    { key: 'unidad_trampa',
+      label: 'Unidad Prueba'
+    },
+    {
+      key: "ruta",
+      label: "Ruta",
+    },
+    {
+      key: "fiscal",
+      label: "Fiscal",
+    },
+    {
+      key: "onTimeText",
+      label: "¿A tiempo?",
+    },
+    {
+      key: "diff",
+      label: "Diferencia (min)",
+    },
+    {
+      key: "delay",
+      label: "Retraso (min)",
+    }
+  ];
 
   //filtrado de datos
   let columns1 = [
@@ -303,6 +345,20 @@ export default function Index({
       label: "Retraso (min)",
     }
   ];
+
+//función para alternar columns1 y columns2
+  const [currentColumns, setCurrentColumns] = useState(columns1);
+  const [showTrapColumn, setShowTrapColumn] = useState(false)
+
+  const toggleColumns = () => {
+  setShowTrapColumn(!showTrapColumn)
+    if(showTrapColumn){
+    setCurrentColumns(columns2)
+    }else{
+    setCurrentColumns(columns1)
+    }
+  };
+
   let columns = [
     {
       key: "hora_servidor",
@@ -436,6 +492,7 @@ export default function Index({
       return {
         key: timestamp.key,
         unidad: timestamp.unidad,
+        unidad_trampa: timestamp.unidad_trampa,
         hora_servidor: timestamp.hora_servidor,
         hora_telefono: timestamp.hora_telefono,
         fiscal: timestamp.fiscal,
@@ -838,7 +895,9 @@ export default function Index({
                 <Button onPress={() => setShowRows(!showRows)} className="bg-sky-600 font-bold">
                   {showRows ? "Ocultar Lista" : "Mostrar Lista"}
                 </Button>
-
+                <Button onPress={toggleColumns} className="bg-sky-600 font-bold">
+                  {showTrapColumn ? "Ocultar" : "Mostrar"}
+                </Button>
                 {todayDate.fecha == fecha ?(
                   <>
                   {loading ? <Button className="bg-sky-600 font-bold cursor-default">
@@ -879,7 +938,7 @@ export default function Index({
                   <Divider/>
                   <CardBody className='h-72'>
                 <Table aria-label={`Tabla de ${registro.title}`}>
-                  <TableHeader columns={columns1} aria-label="Tabla">
+                  <TableHeader columns={currentColumns} aria-label="Tabla">
                         {(column) => (
                           <TableColumn key={column.key}>{column.label}</TableColumn>
                         )}
@@ -917,7 +976,7 @@ export default function Index({
               <Divider />
               <CardBody className='h-72'>
                 <Table aria-label={`Tabla de ${registro.title}`}>
-                  <TableHeader columns={columns1} aria-label="Tabla">
+                  <TableHeader columns={currentColumns} aria-label="Tabla">
                     {(column) => (
                       <TableColumn key={column.key}>{column.label}</TableColumn>
                     )}
