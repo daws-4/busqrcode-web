@@ -55,7 +55,7 @@ export default function Fiscales_add({ unidades }: UnidadesProps) {
         <>
             <div className="mb-10 rounded-sm border border-stroke dark:bg-slate-800 bg-slate-200 shadow-default dark:border-strokedark dark:bg-boxdark">
                 <div className="flex justify-center items-center ">
-                    <Card className="mb-5 w-full">
+                    <Card className="my-5 lg:w-1/3">
                         <CardBody className="m-2">
                             <div className="m-5 ">
                                 <h1 className="text-xl font-bold">Agregar Fiscal</h1>
@@ -63,9 +63,9 @@ export default function Fiscales_add({ unidades }: UnidadesProps) {
                                 <div className="my-4 w-full">
                                     <form onSubmit={submitForm} className="grid gap-4 pr-3 w-full">
                                         <Textarea name="ubicacion" isRequired required type='text' label='Ubicación del Fiscal' />
-                                        <Input name="numero" isRequired required type='number' label='Número del Fiscal' />
-                                        <Input name='username' isRequired required type='text' label='Nombre de usuario'/>
-                                        <Input name='password' isRequired required type='text' min={8} value={password} onChange={(e)=> setPassword(e.target.value)} label='Contraseña'/>
+                                        <Input name="numero" isRequired required type='text' label='Número del Fiscal' />
+                                        <Input name='username' isRequired required type='text' label='Nombre de usuario' />
+                                        <Input name='password' isRequired required type='text' min={8} value={password} onChange={(e) => setPassword(e.target.value)} label='Contraseña' />
                                         <Switch name='sethora' defaultSelected={false} onChange={(e) => setHora(e.target.checked)}>¿Selecciona Hora?</Switch>
                                         <Button type="submit" variant="shadow" className="w-full bg-green-700 text-slate-100">Agregar Fiscal</Button>
                                     </form>

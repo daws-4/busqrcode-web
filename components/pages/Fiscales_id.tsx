@@ -62,7 +62,7 @@ export default function Plantillas_Pizarras_id({ fiscal, params }: Plantillas_Pi
         const deletedPizarra = window.confirm('¿Estás seguro de eliminar la Unidad?, esta acción no se puede deshacer')
         if (deletedPizarra) {
             try {
-                const response = await axios.delete(`/api/fiscales`, { data: { id: params.fisc} });
+                const response = await axios.delete(`/api/fiscales`, { data: { id: params.fisc } });
                 console.log(response)
                 if (response.status == 200) {
                     toast.success('Fiscal eliminado con éxito', { onClose: () => router.push('/fiscales') })
@@ -80,15 +80,15 @@ export default function Plantillas_Pizarras_id({ fiscal, params }: Plantillas_Pi
     return (
         <>
             <div className="mb-10 rounded-sm border border-stroke dark:bg-slate-800 bg-slate-200 shadow-default dark:border-strokedark dark:bg-boxdark">
-                <div className="flex justify-center items-center p-8">
-                    <Card className="mb-5 ">
+                <div className="flex justify-center items-center ">
+                    <Card className="my-5 lg:w-1/2">
                         <CardBody className="m-2">
                             <div className="m-5 ">
                                 <h1 className="text-xl font-bold">Editar Fiscal</h1>
                                 <Divider />
                                 <div className="my-4 w-full">
                                     <form onSubmit={submitForm} className="grid gap-4 pr-3 w-full" >
-                                        <Input name="numero" isRequired required type='number' value={numero} label='Numero del Fiscal' onChange={(e) => setNumero(e.target.value)} />
+                                        <Input name="numero" isRequired required type='text' value={numero} label='Numero del Fiscal' onChange={(e) => setNumero(e.target.value)} />
                                         <Input name='username' isRequired required type='text' value={username} label='Nombre de Usuario Fiscal' onChange={(e) => setUsername(e.target.value)} />
                                         <Input name='password' isRequired required type='text' label='Contraseña' min={8} onChange={(e) => setPassword(e.target.value)} />
                                         <Textarea name="ubicacion" isRequired required type='text' value={ubicacion} label='Ubicacion del Fiscal' onChange={(e) => setUbicacion(e.target.value)} />
