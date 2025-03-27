@@ -134,15 +134,15 @@ export async function POST(request: any) {
         timestamp_salida: null,
       });
 
-      if (unidTimestamps.length > 0) {
-        const lastTimestamp = unidTimestamps[unidTimestamps.length - 1];
-        const comparison = compareTimestamps(
-          lastTimestamp.timestamp_telefono,
-          timestamp_telefono,
-          23
-        );
-        console.log("Comparison Result:", comparison);
-      }
+      // if (unidTimestamps.length > 0) {
+      //   const lastTimestamp = unidTimestamps[unidTimestamps.length - 1];
+      //   const comparison = compareTimestamps(
+      //     lastTimestamp.timestamp_telefono,
+      //     timestamp_telefono,
+      //     23
+      //   );
+      //   console.log("Comparison Result:", comparison);
+      // }
 
       console.log(timestamp, unidTimestamps)
       const saveTimestamp = await timestamp.save();
