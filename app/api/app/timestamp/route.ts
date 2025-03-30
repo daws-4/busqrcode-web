@@ -197,9 +197,13 @@ export async function POST(request: any) {
 
         if (comparison.onTime) {
           console.log("A tiempo:", comparison.onTimeText);
+          const saveTimestamp = await timestamp.save();
+          console.log("saveTimestamp:", saveTimestamp);
           return NextResponse.json({ message: "A tiempo" }, { status: 200 });
         } else if (comparison.delay > 0) {
           console.log("Retardado:", comparison.delay);
+          const saveTimestamp = await timestamp.save();
+          console.log("saveTimestamp:", saveTimestamp);
           return NextResponse.json({ message: "Retardado", delay: comparison.delay}, { status: 201 });
         }
     }else{
