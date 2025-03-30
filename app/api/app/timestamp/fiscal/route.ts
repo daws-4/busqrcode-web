@@ -34,14 +34,3 @@ export async function POST(request: any) {
     }
 }
 
-
-export async function DELETE(request: any){
-    const {id} = await request.json();
-    console.log(id);
-    try {
-        return NextResponse.json({message:'Firma eliminada correctamente'}, { status: 200 });
-    } catch (error) {
-        console.log(error)
-        return NextResponse.json((error as Error).message, { status: 400 });
-    }
-}

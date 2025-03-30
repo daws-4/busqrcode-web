@@ -7,7 +7,6 @@ connectDB()
 export async function GET(request: any) {
     try {
         const rutasList = await rutas.find();
-        console.log('olaaa')
         return NextResponse.json(rutasList);
     } catch (error) {
         return NextResponse.json((error as Error).message, { status: 400 });

@@ -9,7 +9,38 @@ export async function POST(request: any) {
   const { id_ruta, id_unidad, id_fiscal, timestamp_telefono, timestamp_salida } = await request.json();
   console.log(id_ruta, id_unidad, id_fiscal, timestamp_telefono, timestamp_salida);
 
-  const convertToMinutes = (timeString: string) => {
+
+  const formatHour = (dateString: string) => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const secs = String(date.getSeconds()).padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    const strHours = String(hours).padStart(2, "0");
+    return `${strHours}:${minutes} ${ampm}`;
+  };
+  const formatHour30secs = (dateString: string) => {
+    const date = new Date(dateString);
+    date.setSeconds(date.getSeconds() - 30); // Adelantar 30 segundos jasjsjjadas
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const secs = String(date.getSeconds()).padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    const strHours = String(hours).padStart(2, "0");
+    return `${strHours}:${minutes} ${ampm}`;
+  };
+
+  const convertToMinutes = (timeString: string): number => {
     const [time, modifier] = timeString.split(" ");
     let [hours, minutes] = time.split(":").map(Number);
     if (modifier === "PM" && hours !== 12) {
@@ -21,6 +52,7 @@ export async function POST(request: any) {
     return hours * 60 + minutes;
   };
 
+
   const compareTimestamps = (
     time1: string,
     time2: string,
@@ -28,6 +60,8 @@ export async function POST(request: any) {
   ) => {
     const minutes1 = convertToMinutes(time1);
     const minutes2 = convertToMinutes(time2);
+    console.log(time1, time2, maxDelay)
+    // Calcular la diferencia en minutos
     const diff = minutes2 - minutes1;
     return {
       onTime: diff <= maxDelay,
@@ -78,11 +112,6 @@ export async function POST(request: any) {
     });
 
     // Si no se encuentra un registro válido, devolver null
-    if (!closestTimestamp) {
-      console.log("No se encontró un registro válido en el lapso de 60 minutos");
-      return null;
-    }
-    const findFiscal2 = await fiscales.findOne({ _id: closestTimestamp.id_fiscal}) 
     const findFiscal = await fiscales.findOne({ _id: id_fiscal });
 
 
@@ -98,9 +127,21 @@ export async function POST(request: any) {
       return NextResponse.json(saveTimestamp);
     } else {
 
+         const timestamp = new timestamps({
+           id_ruta,
+           id_unidad,
+           id_fiscal,
+           timestamp_telefono,
+           timestamp_salida: null,
+         });
 
 
-      let tiempo;
+    if (closestTimestamp) {
+      const findFiscal2 = await fiscales.findOne({
+        _id: closestTimestamp.id_fiscal,
+      });
+      
+      let tiempo = 0;
       if (
         findFiscal.ubicacion == "Centro" &&
         findFiscal2.ubicacion == "Terminal"
@@ -120,36 +161,32 @@ export async function POST(request: any) {
         findFiscal.ubcicacion == "Panaderia" &&
         findFiscal2.ubicacion == "Barrancas"
       ) {
-            const isBefore8am = closestTimestamp.timestamp_salida < 8 * 60; // 8am in minutes
-            const threshold = isBefore8am ? 12 : 14;
-            tiempo = threshold
+        const isBefore8am = closestTimestamp.timestamp_salida < 8 * 60; // 8am in minutes
+        const threshold = isBefore8am ? 12 : 14;
+        tiempo = threshold
       }
+      
 
-      //formathour30 secs y mejorar el código
-      const timestamp = new timestamps({
-        id_ruta,
-        id_unidad,
-        id_fiscal,
-        timestamp_telefono,
-        timestamp_salida: null,
-      });
+      const time1 = formatHour(closestTimestamp.timestamp_salida)
+      const time2 = formatHour30secs(timestamp_telefono)
+        const comparison = compareTimestamps(
+          time1,
+          time2,
+          tiempo
+        );
+        console.log("Comparison Result:", comparison);
 
-      // if (unidTimestamps.length > 0) {
-      //   const lastTimestamp = unidTimestamps[unidTimestamps.length - 1];
-      //   const comparison = compareTimestamps(
-      //     lastTimestamp.timestamp_telefono,
-      //     timestamp_telefono,
-      //     23
-      //   );
-      //   console.log("Comparison Result:", comparison);
-      // }
-
-      console.log(timestamp, unidTimestamps)
+        if (comparison.onTime) {
+          console.log("A tiempo:", comparison.onTimeText);
+          return NextResponse.json({ message: "A tiempo" }, { status: 200 });
+        } else if (comparison.delay > 0) {
+          console.log("Retardado:", comparison.delay);
+          return NextResponse.json({ message: "Retardado", delay: comparison.delay}, { status: 201 });
+        }
+    }
       const saveTimestamp = await timestamp.save();
       return NextResponse.json(saveTimestamp);
     }
-
-
   } catch (error) {
     console.log(error);
     return NextResponse.json((error as Error).message, { status: 400 });
