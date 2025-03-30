@@ -99,17 +99,36 @@ export async function POST(request: any) {
     const findFiscales = await fiscales.find();
     const terminalFiscal = findFiscales.find((fiscal) => fiscal.ubicacion === "Terminal");
     const barrancasFiscal = findFiscales.find((fiscal) => fiscal.ubicacion === "Barrancas");
+    console.log(terminalFiscal, "Terminal");
+    console.log(barrancasFiscal, "Barrancas");
 
     // Filtrar el registro anterior más cercano en el lapso de 60 minutos
-    const closestTimestamp = unidTimestamps.find((timestamp) => {
-      const fiscalId = terminalFiscal?._id || barrancasFiscal?._id;
-      if (timestamp.id_fiscal.toString() === fiscalId?.toString()) {
-        const timeDiff = Math.abs(new Date().getTime() - new Date(timestamp.createdAt).getTime());
-        const diffInMinutes = timeDiff / (1000 * 60); // Convertir diferencia a minutos
-        return diffInMinutes <= 60;
-      }
-      return false;
-    });
+     const closestTimestamp = unidTimestamps.find((timestamp) => {
+       const terminalFiscalId = terminalFiscal?._id;
+       const barrancasFiscalId = barrancasFiscal?._id;
+
+       // Buscar fiscales con setHora === true
+       const setHoraFiscales = findFiscales
+         .filter((fiscal) => fiscal.sethora === true)
+         .map((fiscal) => fiscal._id);
+
+       // Verificar si el timestamp.id_fiscal coincide con el fiscal del terminal, barrancas o alguno con setHora === true
+       const isValidFiscal =
+         timestamp.id_fiscal.toString() === terminalFiscalId?.toString() ||
+         timestamp.id_fiscal.toString() === barrancasFiscalId?.toString() ||
+         setHoraFiscales.some(
+           (fiscalId) => timestamp.id_fiscal.toString() === fiscalId?.toString()
+         );
+
+       if (isValidFiscal) {
+         const timeDiff = Math.abs(
+           new Date().getTime() - new Date(timestamp.createdAt).getTime()
+         );
+         const diffInMinutes = timeDiff / (1000 * 60); // Convertir diferencia a minutos
+         return diffInMinutes <= 60;
+       }
+       return false;
+     });
 
     // Si no se encuentra un registro válido, devolver null
     const findFiscal = await fiscales.findOne({ _id: id_fiscal });
@@ -153,12 +172,12 @@ export async function POST(request: any) {
       ) {
         tiempo = 45;
       } else if (
-        findFiscal.ubcicacion == "Panaderia" &&
+        findFiscal.ubicacion == "Panaderia" &&
         findFiscal2.ubicacion == "Terminal"
       ) {
         tiempo = 47;
       } else if (
-        findFiscal.ubcicacion == "Panaderia" &&
+        findFiscal.ubicacion == "Panaderia" &&
         findFiscal2.ubicacion == "Barrancas"
       ) {
         const isBefore8am = closestTimestamp.timestamp_salida < 8 * 60; // 8am in minutes
@@ -183,6 +202,8 @@ export async function POST(request: any) {
           console.log("Retardado:", comparison.delay);
           return NextResponse.json({ message: "Retardado", delay: comparison.delay}, { status: 201 });
         }
+    }else{
+      console.log('no se encontró timestamp cercano')
     }
       const saveTimestamp = await timestamp.save();
       return NextResponse.json(saveTimestamp);
