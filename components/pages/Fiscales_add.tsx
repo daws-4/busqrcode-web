@@ -16,6 +16,7 @@ export default function Fiscales_add({ unidades }: UnidadesProps) {
 
     const [password, setPassword] = useState('');
     const [hora, setHora] = useState(false);
+    const [delet, setDelete] = useState(false);
 
 
     const submitForm = async (e: any) => {
@@ -25,6 +26,7 @@ export default function Fiscales_add({ unidades }: UnidadesProps) {
             ubicacion: form.get('ubicacion'),
             numero: form.get('numero'),
             username: form.get('username'),
+            setDelete: delet,
             sethora: hora,
             password: await bcrypt.hash(password, 10)
         }
@@ -67,6 +69,7 @@ export default function Fiscales_add({ unidades }: UnidadesProps) {
                                         <Input name='username' isRequired required type='text' label='Nombre de usuario' />
                                         <Input name='password' isRequired required type='text' min={8} value={password} onChange={(e) => setPassword(e.target.value)} label='Contraseña' />
                                         <Switch name='sethora' defaultSelected={false} onChange={(e) => setHora(e.target.checked)}>¿Selecciona Hora?</Switch>
+                                        <Switch name='setDelete' defaultSelected={false} onChange={(e) => setDelete(e.target.checked)}>¿Elimina Registros?</Switch>
                                         <Button type="submit" variant="shadow" className="w-full bg-green-700 text-slate-100">Agregar Fiscal</Button>
                                     </form>
                                 </div>
