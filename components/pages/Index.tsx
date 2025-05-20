@@ -15,7 +15,7 @@ import {
   CardHeader,
 } from "@heroui/react";
 import classNames from "classnames";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import html2canvas from 'html2canvas';
 import ReactDOMServer from 'react-dom/server';
 import { toast } from "react-toastify";
@@ -263,10 +263,15 @@ export default function Index({
       }
   
   });
-  let rows = getTimestamps.filter((timestamp: any) => {
-    let registros = timestamp.hora_date.includes(fecha);
-    return registros;
-  });
+  let rows = useMemo(() => {
+    console.time("Filtrado de timestamps");
+    const filteredRows = getTimestamps.filter((timestamp: any) => {
+      let registros = timestamp.hora_date.includes(fecha);
+      return registros;
+    });
+    console.timeEnd("Filtrado de timestamps");
+    return filteredRows;
+  }, [getTimestamps, fecha]);
 
   rows.sort((a: any, b: any) => new Date(a.hora_date).getTime() - new Date(b.hora_date).getTime());
 
@@ -629,13 +634,20 @@ let columns2 = [
   };
 
     // Llamar a la función de comparación
-    const registrosOrdenados = compareTimestamps(setTimestamps);
-    console.log(registrosOrdenados);
+  const registrosOrdenados = useMemo(() => {
+    console.time("Ordenamiento de registros");
+    const orderedRegistros = compareTimestamps(setTimestamps);
+    console.timeEnd("Ordenamiento de registros");
+    return orderedRegistros;
+  }, [setTimestamps]);
 
   // Filtrar registros retardados
-  const registrosRetardados = getRegistrosRetardados(registrosOrdenados);
-  console.log(registrosRetardados);
-    
+  const registrosRetardados = useMemo(() => {
+    console.time("Filtrado de retardados");
+    const tardyRegistros = getRegistrosRetardados(registrosOrdenados);
+    console.timeEnd("Filtrado de retardados");
+    return tardyRegistros;
+  }, [registrosOrdenados]);
 
 
     //descargar imagenes
