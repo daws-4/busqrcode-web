@@ -537,7 +537,7 @@ let columns2 = [
             if (group[i].fiscal === "Terminal" && group[i + 1].fiscal === "Centro") {
               const time1 = convertToMinutes(group[i].hora_servidor);
               const time2 = convertToMinutes(group[i + 1].hora_telefono);
-              let tiempo = (ruta?.nombre == 'Colinas de Mercado') ? 25 : 23;
+              let tiempo = (ruta?.nombre == 'Colinas de Mercado') ? 23 : 25;
               const diff = time2 - time1;
               group[i + 1].onTime = diff <= tiempo;
               group[i + 1].onTimeText = diff <= tiempo ? "A tiempo" : "Retardado";
