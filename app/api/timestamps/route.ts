@@ -21,7 +21,7 @@ export async function POST(request: any) {
     const startOfDayUTC = startOfDayVenezuela.utc().toDate();
     const endOfDayUTC = endOfDayVenezuela.utc().toDate();
 
-    console.log(startOfDayUTC, endOfDayUTC);
+    // console.log(startOfDayUTC, endOfDayUTC);
 
     const registrosDeHoy = await timestamps.find({
       createdAt: {
@@ -30,8 +30,8 @@ export async function POST(request: any) {
       },
     });
     //id_fiscal : ObjectId('672ba1914234ebf7a715124f')
-    console.log(registrosDeHoy);
-    console.log(fecha);
+    // console.log(registrosDeHoy);
+    // console.log(fecha);
     return NextResponse.json(registrosDeHoy);
   } catch (error) {
     return NextResponse.json(

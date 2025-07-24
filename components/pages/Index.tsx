@@ -472,23 +472,9 @@ let columns2 = [
     setRuta(null);
     setFiscal(null);
     setHorario(null);
-    setFiscalA(null)
-    setFiscalB(null)
     settimeCompare(null)
   };
 
-  //comparación de datos
-  console.log(
-    "fiscalA",
-    fiscalA,
-    "fiscalB",
-    fiscalB,
-    "timeCompare",
-    timeCompare
-  );
-        const fiscalAExists = rows.some((row: any) => row.fiscal === fiscalA);
-        const fiscalBExists = rows.some((row: any) => row.fiscal === fiscalB);
-       
 
         //seccionar la comparación automáticamente por unidad independientemente de la ruta, definir los tiempos de comparación en minutos en las determinadas sitauciones
 
@@ -507,16 +493,8 @@ let columns2 = [
 
     // Lista de todas las unidades que existen en el array de timestamps
     const unidadesordenadas = [...new Set(setTimestamps.map((timestamp: any) => timestamp.unidad))].sort((a, b) => a - b);
-    console.log("Unidades ordenadas:", unidadesordenadas);
+    // console.log("Unidades ordenadas:", unidadesordenadas);
     // setUnidadesOrdenadas(unidadesordenadas);
-
-
-
-
-
-
-
-
     // Función para comparar registros
     const compareTimestamps = (timestamps: any[]) => {
       const grouped = timestamps.reduce((acc: any, timestamp: any) => {
@@ -558,11 +536,12 @@ let columns2 = [
             if (group[i].fiscal === "Terminal" && group[i + 1].fiscal === "Centro") {
               const time1 = convertToMinutes(group[i].hora_servidor);
               const time2 = convertToMinutes(group[i + 1].hora_telefono);
+              let tiempo = (ruta?.nombre == 'Colinas de Mercado') ? 25 : 23;
               const diff = time2 - time1;
-              group[i + 1].onTime = diff <= 23;
-              group[i + 1].onTimeText = diff <= 23 ? "A tiempo" : "Retardado";
+              group[i + 1].onTime = diff <= tiempo;
+              group[i + 1].onTimeText = diff <= tiempo ? "A tiempo" : "Retardado";
               group[i + 1].diff = diff;
-              group[i + 1].delay = diff > 23 ? diff - 23 : 0;
+              group[i + 1].delay = diff > tiempo ? diff - tiempo : 0;
             }
 
             if (group[i].fiscal == "Terminal" && group[i + 2]?.fiscal == "3 esquinas"){
@@ -666,7 +645,7 @@ let columns2 = [
       }
       // Extraer los datos de la tabla
       const tableData = ref.outerHTML || '';
-      console.log(registrosRetardados[index])
+      // console.log(registrosRetardados[index])
       // Crear un nuevo componente que contenga los datos
 
       const cardHtml = ReactDOMServer.renderToString(
