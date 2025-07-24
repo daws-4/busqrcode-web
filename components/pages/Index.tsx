@@ -45,6 +45,7 @@ const todayDate = getTodayDate();
 
 
 //componente card
+//cheo lo mama
 
 interface CustomCardProps {
   columns1: { key: string, label: string }[];
