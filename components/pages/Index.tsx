@@ -535,9 +535,10 @@ let columns2 = [
           
           for (let i = 0; i < group.length - 1; i++) {
             if (group[i].fiscal === "Terminal" && group[i + 1].fiscal === "Centro") {
+              const ruta = rutas_.find((ruta: any) => ruta.nombre == group[i].ruta);
               const time1 = convertToMinutes(group[i].hora_servidor);
               const time2 = convertToMinutes(group[i + 1].hora_telefono);
-              let tiempo = (ruta?.nombre == 'Colinas de Mercado') ? 23 : 25;
+              let tiempo = (ruta?.nombre == 'Colinas de Mercado') ? 25 : 23;
               const diff = time2 - time1;
               group[i + 1].onTime = diff <= tiempo;
               group[i + 1].onTimeText = diff <= tiempo ? "A tiempo" : "Retardado";
