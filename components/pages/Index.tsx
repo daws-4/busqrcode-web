@@ -538,14 +538,40 @@ let columns2 = [
               const ruta = rutas_.find((ruta: any) => ruta.nombre == group[i].ruta);
               const time1 = convertToMinutes(group[i].hora_servidor);
               const time2 = convertToMinutes(group[i + 1].hora_telefono);
-              let tiempo = (ruta?.nombre == 'Colinas de Mercado') ? 25 : 23;
+              let tiempo = (ruta?.nombre == 'Colinas de Mercado' || ruta?.nombre == 'Riberas del Torbes') ? 25 : 23;
               const diff = time2 - time1;
               group[i + 1].onTime = diff <= tiempo;
               group[i + 1].onTimeText = diff <= tiempo ? "A tiempo" : "Retardado";
               group[i + 1].diff = diff;
               group[i + 1].delay = diff > tiempo ? diff - tiempo : 0;
             }
-
+            if (group[i].fiscal == "Terminal" && group[i + 2]?.fiscal == "Riberas del Torbes") {
+              const time1 = convertToMinutes(group[i].hora_servidor);
+              const time2 = convertToMinutes(group[i + 2].hora_telefono);
+              const diff = time2 - time1;
+              group[i + 2].onTime = diff <= 37;
+              group[i + 2].onTimeText = diff <= 37 ? "A tiempo" : "Retardado";
+              group[i + 2].diff = diff;
+              group[i + 2].delay = diff > 37 ? diff - 37 : 0;
+            }
+            if (group[i].fiscal == "Terminal" && group[i + 1]?.fiscal == "Riberas del Torbes") {
+              const time1 = convertToMinutes(group[i].hora_servidor);
+              const time2 = convertToMinutes(group[i + 1].hora_telefono);
+              const diff = time2 - time1;
+              group[i + 1].onTime = diff <= 37;
+              group[i + 1].onTimeText = diff <= 37 ? "A tiempo" : "Retardado";
+              group[i + 1].diff = diff;
+              group[i + 1].delay = diff > 37 ? diff - 37 : 0;
+            }
+            if (group[i].fiscal == "Panaderia" && group[i + 1]?.fiscal == "Riberas del Torbes") {
+              const time1 = convertToMinutes(group[i].hora_servidor);
+              const time2 = convertToMinutes(group[i + 1].hora_telefono);
+              const diff = time2 - time1;
+              group[i + 1].onTime = diff <= 15;
+              group[i + 1].onTimeText = diff <= 15 ? "A tiempo" : "Retardado";
+              group[i + 1].diff = diff;
+              group[i + 1].delay = diff > 15 ? diff - 15 : 0;
+            }
             if (group[i].fiscal == "Terminal" && group[i + 2]?.fiscal == "3 esquinas"){
               const time1 = convertToMinutes(group[i].hora_servidor);
               const time2 = convertToMinutes(group[i + 2].hora_telefono);
