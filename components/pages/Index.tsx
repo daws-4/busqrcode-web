@@ -545,7 +545,7 @@ let columns2 = [
               group[i + 1].diff = diff;
               group[i + 1].delay = diff > tiempo ? diff - tiempo : 0;
             }
-            if (group[i].fiscal == "Terminal" && group[i + 2]?.fiscal == "Riberas del Torbes") {
+            if (group[i].fiscal == "Terminal" && group[i + 2]?.fiscal == "Riberas") {
               const time1 = convertToMinutes(group[i].hora_servidor);
               const time2 = convertToMinutes(group[i + 2].hora_telefono);
               const diff = time2 - time1;
@@ -554,7 +554,7 @@ let columns2 = [
               group[i + 2].diff = diff;
               group[i + 2].delay = diff > 37 ? diff - 37 : 0;
             }
-            if (group[i].fiscal == "Terminal" && group[i + 1]?.fiscal == "Riberas del Torbes") {
+            if (group[i].fiscal == "Terminal" && group[i + 1]?.fiscal == "Riberas") {
               const time1 = convertToMinutes(group[i].hora_servidor);
               const time2 = convertToMinutes(group[i + 1].hora_telefono);
               const diff = time2 - time1;
@@ -563,7 +563,7 @@ let columns2 = [
               group[i + 1].diff = diff;
               group[i + 1].delay = diff > 37 ? diff - 37 : 0;
             }
-            if (group[i].fiscal == "Panaderia" && group[i + 1]?.fiscal == "Riberas del Torbes") {
+            if (group[i].fiscal == "Panaderia" && group[i + 1]?.fiscal == "Riberas") {
               const time1 = convertToMinutes(group[i].hora_servidor);
               const time2 = convertToMinutes(group[i + 1].hora_telefono);
               const diff = time2 - time1;
