@@ -20,15 +20,16 @@ import html2canvas from 'html2canvas';
 import ReactDOMServer from 'react-dom/server';
 import { toast } from "react-toastify";
 import axios from "axios";
-import {ScrollUpIcon}  from "../icons";
+import { ScrollUpIcon } from "../icons";
 import jsPDF from 'jspdf';
+import { usePDF } from 'react-to-pdf';
 interface IndexProps {
   horarios?: any;
   rutas?: any;
   fiscales?: any;
   timestamps?: any;
   unidades?: any;
-  payload?:any;
+  payload?: any;
 }
 
 const getTodayDate = () => {
@@ -36,7 +37,7 @@ const getTodayDate = () => {
   const year = today.getFullYear();
   const month = String(today.getMonth() + 1).padStart(2, "0");
   const day = String(today.getDate()).padStart(2, "0");
-  return {fecha:`${year}-${month}-${day}`};
+  return { fecha: `${year}-${month}-${day}` };
 };
 
 // Uso de la función
@@ -97,9 +98,9 @@ const CustomCard: React.FC<CustomCardProps> = ({ columns1, titulo, group, onDown
 
 export default function Index({
   horarios,
-  rutas, 
+  rutas,
   fiscales,
-  timestamps, 
+  timestamps,
   unidades,
   payload,
 }: IndexProps) {
@@ -238,31 +239,31 @@ export default function Index({
     const ruta = rutas_.filter((r: any) => r._id === timestamp.id_ruta);
     const fiscal = fiscales_.filter((f: any) => f._id === timestamp.id_fiscal);
     const unidad = unidades_.filter((u: any) => u._id === timestamp.id_unidad);
-     if(timestamp.timestamp_salida === null){
-       return {
-         key: timestamp._id,
-         hora_date: formatDate(timestamp.createdAt),
-         hora_servidor: formatHour30secs(timestamp.createdAt),
-         hora_telefono: formatHour30secs(timestamp.timestamp_telefono),
-         unidad: unidad[0].numero,
-         unidad_trampa: unidad[0].nombre_conductor,
-         ruta: ruta[0].nombre,
-         fiscal: fiscal[0].ubicacion,
-       };
-     }else{
-       return {
-         key: timestamp._id,
-         hora_date: formatDate(timestamp.timestamp_salida),
+    if (timestamp.timestamp_salida === null) {
+      return {
+        key: timestamp._id,
+        hora_date: formatDate(timestamp.createdAt),
+        hora_servidor: formatHour30secs(timestamp.createdAt),
+        hora_telefono: formatHour30secs(timestamp.timestamp_telefono),
+        unidad: unidad[0].numero,
+        unidad_trampa: unidad[0].nombre_conductor,
+        ruta: ruta[0].nombre,
+        fiscal: fiscal[0].ubicacion,
+      };
+    } else {
+      return {
+        key: timestamp._id,
+        hora_date: formatDate(timestamp.timestamp_salida),
         //  hora_servidor: formatHour(timestamp.createdAt),
-         hora_servidor: formatHour(timestamp.timestamp_salida),
-         hora_telefono: formatHour(timestamp.timestamp_telefono),
-         unidad: unidad[0].numero,
-         unidad_trampa: unidad[0].nombre_conductor,
-         ruta: ruta[0].nombre,
-         fiscal: fiscal[0].ubicacion,
-        };
-      }
-  
+        hora_servidor: formatHour(timestamp.timestamp_salida),
+        hora_telefono: formatHour(timestamp.timestamp_telefono),
+        unidad: unidad[0].numero,
+        unidad_trampa: unidad[0].nombre_conductor,
+        ruta: ruta[0].nombre,
+        fiscal: fiscal[0].ubicacion,
+      };
+    }
+
   });
   let rows = useMemo(() => {
     console.time("Filtrado de timestamps");
@@ -276,9 +277,9 @@ export default function Index({
 
   rows.sort((a: any, b: any) => new Date(a.hora_date).getTime() - new Date(b.hora_date).getTime());
 
-// columna con unidades trampa
+  // columna con unidades trampa
 
-let columns2 = [
+  let columns2Trampa = [
     {
       key: "hora_servidor",
       label: "Hora Servidor",
@@ -291,7 +292,8 @@ let columns2 = [
       key: "unidad",
       label: "Unidad",
     },
-    { key: 'unidad_trampa',
+    {
+      key: 'unidad_trampa',
       label: 'Unidad Prueba'
     },
     {
@@ -352,16 +354,62 @@ let columns2 = [
     }
   ];
 
-//función para alternar columns1 y columns2
+  let columns2 = [
+    {
+      key: "unidad",
+      label: "Control",
+    },
+    {
+      key: "hora_salida",
+      label: "Hora Salida",
+    },
+    {
+      key: "ruta",
+      label: "Ruta",
+    },
+    {
+      key: "hora_telefono",
+      label: "Hora Teléfono",
+    },
+    {
+      key: "fiscal",
+      label: "Fiscal",
+    },
+    {
+      key: "onTimeText",
+      label: "¿A tiempo?",
+    },
+    {
+      key: "diff",
+      label: "Diferencia (min)",
+    },
+    {
+      key: "delay",
+      label: "Retraso (min)",
+    }
+  ];
+
+  let columnsFisc = [
+    {
+      key: "Fiscal",
+      label: "Punto-Fiscal"
+    },
+    {
+      key: "cantidad",
+      label: "Cantidad"
+    }
+  ];
+
+  //función para alternar columns1 y columns2
   const [currentColumns, setCurrentColumns] = useState(columns1);
   const [showTrapColumn, setShowTrapColumn] = useState(false)
 
   const toggleColumns = () => {
-  setShowTrapColumn(!showTrapColumn)
-    if(showTrapColumn){
-    setCurrentColumns(columns2)
-    }else{
-    setCurrentColumns(columns1)
+    setShowTrapColumn(!showTrapColumn)
+    if (showTrapColumn) {
+      setCurrentColumns(columns2Trampa)
+    } else {
+      setCurrentColumns(columns1)
     }
   };
 
@@ -422,7 +470,7 @@ let columns2 = [
         label: "Retraso (min)",
       }
     ];
-    rows = rows.filter((timestamp: any) => timestamp.unidad == unidad && timestamp.ruta === ruta); 
+    rows = rows.filter((timestamp: any) => timestamp.unidad == unidad && timestamp.ruta === ruta);
   } else if (ruta) {
     columns = [
       {
@@ -477,161 +525,161 @@ let columns2 = [
   };
 
 
-        //seccionar la comparación automáticamente por unidad independientemente de la ruta, definir los tiempos de comparación en minutos en las determinadas sitauciones
+  //seccionar la comparación automáticamente por unidad independientemente de la ruta, definir los tiempos de comparación en minutos en las determinadas sitauciones
 
 
-    const setTimestamps: any[] = rows.map((timestamp: any) => {
-      return {
-        key: timestamp.key,
-        unidad: timestamp.unidad,
-        unidad_trampa: timestamp.unidad_trampa,
-        hora_servidor: timestamp.hora_servidor,
-        hora_telefono: timestamp.hora_telefono,
-        fiscal: timestamp.fiscal,
-        ruta: timestamp.ruta,
-      };
-    });
-
-    // Lista de todas las unidades que existen en el array de timestamps
-    const unidadesordenadas = [...new Set(setTimestamps.map((timestamp: any) => timestamp.unidad))].sort((a, b) => a - b);
-    // console.log("Unidades ordenadas:", unidadesordenadas);
-    // setUnidadesOrdenadas(unidadesordenadas);
-    // Función para comparar registros
-    const compareTimestamps = (timestamps: any[]) => {
-      const grouped = timestamps.reduce((acc: any, timestamp: any) => {
-        const key = `${timestamp.unidad}-${timestamp.ruta}`;
-        if (!acc[key]) {
-          acc[key] = [];
-        }
-        acc[key].push(timestamp);
-        return acc;
-      }, {});
-
-      // Ordenar las claves de los grupos por el número de unidad
-      const sortedKeys = Object.keys(grouped).sort((a, b) => {
-        const unitA = parseInt(a.split('-')[0], 10);
-        const unitB = parseInt(b.split('-')[0], 10);
-        return unitA - unitB;
-      });
-      let sortedRegistros: any[] = []
-      sortedKeys.forEach((key) => {
-        const group = grouped[key];
-        const fiscales = new Set(group.map((timestamp: any) => timestamp.fiscal));
-        if (fiscales.size > 1) {
-          // Convertir hora_servidor a minutos
-          const convertToMinutes = (timeString: string) => {
-            const [time, modifier] = timeString.split(' ');
-            let [hours, minutes] = time.split(':').map(Number);
-            if (modifier === 'PM' && hours !== 12) {
-              hours += 12;
-            }
-            if (modifier === 'AM' && hours === 12) {
-              hours = 0;
-            }
-            return hours * 60 + minutes;
-          };
-
-          // Comparar la posición 0 con la posición 1 solo si el primer fiscal es "Terminal" y el segundo es "Centro"
-          
-          for (let i = 0; i < group.length - 1; i++) {
-            if (group[i].fiscal === "Terminal" && group[i + 1].fiscal === "Centro") {
-              const ruta = rutas_.find((ruta: any) => ruta.nombre == group[i].ruta);
-              const time1 = convertToMinutes(group[i].hora_servidor);
-              const time2 = convertToMinutes(group[i + 1].hora_telefono);
-              let tiempo = (ruta?.nombre == 'Colinas de Mercado' || ruta?.nombre == 'Riberas del Torbes') ? 25 : 23;
-              const diff = time2 - time1;
-              group[i + 1].onTime = diff <= tiempo;
-              group[i + 1].onTimeText = diff <= tiempo ? "A tiempo" : "Retardado";
-              group[i + 1].diff = diff;
-              group[i + 1].delay = diff > tiempo ? diff - tiempo : 0;
-            }
-            if (group[i].fiscal == "Terminal" && group[i + 2]?.fiscal == "Riberas") {
-              const time1 = convertToMinutes(group[i].hora_servidor);
-              const time2 = convertToMinutes(group[i + 2].hora_telefono);
-              const diff = time2 - time1;
-              group[i + 2].onTime = diff <= 37;
-              group[i + 2].onTimeText = diff <= 37 ? "A tiempo" : "Retardado";
-              group[i + 2].diff = diff;
-              group[i + 2].delay = diff > 37 ? diff - 37 : 0;
-            }
-            if (group[i].fiscal == "Terminal" && group[i + 1]?.fiscal == "Riberas") {
-              const time1 = convertToMinutes(group[i].hora_servidor);
-              const time2 = convertToMinutes(group[i + 1].hora_telefono);
-              const diff = time2 - time1;
-              group[i + 1].onTime = diff <= 37;
-              group[i + 1].onTimeText = diff <= 37 ? "A tiempo" : "Retardado";
-              group[i + 1].diff = diff;
-              group[i + 1].delay = diff > 37 ? diff - 37 : 0;
-            }
-            if (group[i].fiscal == "Panaderia" && group[i + 1]?.fiscal == "Riberas") {
-              const time1 = convertToMinutes(group[i].hora_servidor);
-              const time2 = convertToMinutes(group[i + 1].hora_telefono);
-              const diff = time2 - time1;
-              group[i + 1].onTime = diff <= 15;
-              group[i + 1].onTimeText = diff <= 15 ? "A tiempo" : "Retardado";
-              group[i + 1].diff = diff;
-              group[i + 1].delay = diff > 15 ? diff - 15 : 0;
-            }
-            if (group[i].fiscal == "Terminal" && group[i + 2]?.fiscal == "3 esquinas"){
-              const time1 = convertToMinutes(group[i].hora_servidor);
-              const time2 = convertToMinutes(group[i + 2].hora_telefono);
-              const diff = time2 - time1;
-              group[i + 2].onTime = diff <= 45;
-              group[i + 2].onTimeText = diff <= 45 ? "A tiempo" : "Retardado";
-              group[i + 2].diff = diff;
-              group[i + 2].delay = diff > 45 ? diff - 45 : 0;
-            }
-            if (group[i].fiscal == 'Barrancas' && group[i + 1]?.fiscal == 'Panaderia') {
-              const time1 = convertToMinutes(group[i].hora_servidor);
-              const time2 = convertToMinutes(group[i + 1].hora_telefono);
-              const diff = time2 - time1;
-              const isBefore8am = time1 < 8 * 60; // 8am in minutes
-              const threshold = isBefore8am ? 12 : 14;
-              group[i + 1].onTime = diff <= threshold;
-              group[i + 1].onTimeText = diff <= threshold ? "A tiempo" : "Retardado";
-              group[i + 1].diff = diff;
-              group[i + 1].delay = diff > threshold ? diff - threshold : 0;
-            }
-            if (group[i].fiscal == "Terminal" && group[i + 1]?.fiscal == "3 esquinas") {
-              const time1 = convertToMinutes(group[i].hora_servidor);
-              const time2 = convertToMinutes(group[i + 1].hora_telefono);
-              const diff = time2 - time1;
-              group[i + 1].onTime = diff <= 45;
-              group[i + 1].onTimeText = diff <= 45 ? "A tiempo" : "Retardado";
-              group[i + 1].diff = diff;
-              group[i + 1].delay = diff > 45 ? diff - 45 : 0;
-            }
-            if (group[i].fiscal == "Terminal" && group[i + 2]?.fiscal == "Panaderia") {
-              const time1 = convertToMinutes(group[i].hora_servidor);
-              const time2 = convertToMinutes(group[i + 2].hora_telefono);
-              const diff = time2 - time1;
-              group[i + 2].onTime = diff <= 47;
-              group[i + 2].onTimeText = diff <= 47 ? "A tiempo" : "Retardado";
-              group[i + 2].diff = diff;
-              group[i + 2].delay = diff > 47 ? diff - 47 : 0;
-            }
-            if (group[i].fiscal == "Terminal" && group[i + 1]?.fiscal == "Panaderia") {
-              const time1 = convertToMinutes(group[i].hora_servidor);
-              const time2 = convertToMinutes(group[i + 1].hora_telefono);
-              const diff = time2 - time1;
-              group[i + 1].onTime = diff <= 47;
-              group[i + 1].onTimeText = diff <= 47 ? "A tiempo" : "Retardado";
-              group[i + 1].diff = diff;
-              group[i + 1].delay = diff > 47 ? diff - 47 : 0;
-            }
-          }
-
-          const sorted = {
-            title: key,
-            group,
-          }
-          sortedRegistros.push(sorted)
-        }
-        
-
-      });
-      return sortedRegistros;
+  const setTimestamps: any[] = rows.map((timestamp: any) => {
+    return {
+      key: timestamp.key,
+      unidad: timestamp.unidad,
+      unidad_trampa: timestamp.unidad_trampa,
+      hora_servidor: timestamp.hora_servidor,
+      hora_telefono: timestamp.hora_telefono,
+      fiscal: timestamp.fiscal,
+      ruta: timestamp.ruta,
     };
+  });
+
+  // Lista de todas las unidades que existen en el array de timestamps
+  const unidadesordenadas = [...new Set(setTimestamps.map((timestamp: any) => timestamp.unidad))].sort((a, b) => a - b);
+  // console.log("Unidades ordenadas:", unidadesordenadas);
+  // setUnidadesOrdenadas(unidadesordenadas);
+  // Función para comparar registros
+  const compareTimestamps = (timestamps: any[]) => {
+    const grouped = timestamps.reduce((acc: any, timestamp: any) => {
+      const key = `${timestamp.unidad}-${timestamp.ruta}`;
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(timestamp);
+      return acc;
+    }, {});
+
+    // Ordenar las claves de los grupos por el número de unidad
+    const sortedKeys = Object.keys(grouped).sort((a, b) => {
+      const unitA = parseInt(a.split('-')[0], 10);
+      const unitB = parseInt(b.split('-')[0], 10);
+      return unitA - unitB;
+    });
+    let sortedRegistros: any[] = []
+    sortedKeys.forEach((key) => {
+      const group = grouped[key];
+      const fiscales = new Set(group.map((timestamp: any) => timestamp.fiscal));
+      if (fiscales.size > 1) {
+        // Convertir hora_servidor a minutos
+        const convertToMinutes = (timeString: string) => {
+          const [time, modifier] = timeString.split(' ');
+          let [hours, minutes] = time.split(':').map(Number);
+          if (modifier === 'PM' && hours !== 12) {
+            hours += 12;
+          }
+          if (modifier === 'AM' && hours === 12) {
+            hours = 0;
+          }
+          return hours * 60 + minutes;
+        };
+
+        // Comparar la posición 0 con la posición 1 solo si el primer fiscal es "Terminal" y el segundo es "Centro"
+
+        for (let i = 0; i < group.length - 1; i++) {
+          if (group[i].fiscal === "Terminal" && group[i + 1].fiscal === "Centro") {
+            const ruta = rutas_.find((ruta: any) => ruta.nombre == group[i].ruta);
+            const time1 = convertToMinutes(group[i].hora_servidor);
+            const time2 = convertToMinutes(group[i + 1].hora_telefono);
+            let tiempo = (ruta?.nombre == 'Colinas de Mercado' || ruta?.nombre == 'Riberas del Torbes') ? 25 : 23;
+            const diff = time2 - time1;
+            group[i + 1].onTime = diff <= tiempo;
+            group[i + 1].onTimeText = diff <= tiempo ? "A tiempo" : "Retardado";
+            group[i + 1].diff = diff;
+            group[i + 1].delay = diff > tiempo ? diff - tiempo : 0;
+          }
+          if (group[i].fiscal == "Terminal" && group[i + 2]?.fiscal == "Riberas") {
+            const time1 = convertToMinutes(group[i].hora_servidor);
+            const time2 = convertToMinutes(group[i + 2].hora_telefono);
+            const diff = time2 - time1;
+            group[i + 2].onTime = diff <= 37;
+            group[i + 2].onTimeText = diff <= 37 ? "A tiempo" : "Retardado";
+            group[i + 2].diff = diff;
+            group[i + 2].delay = diff > 37 ? diff - 37 : 0;
+          }
+          if (group[i].fiscal == "Terminal" && group[i + 1]?.fiscal == "Riberas") {
+            const time1 = convertToMinutes(group[i].hora_servidor);
+            const time2 = convertToMinutes(group[i + 1].hora_telefono);
+            const diff = time2 - time1;
+            group[i + 1].onTime = diff <= 37;
+            group[i + 1].onTimeText = diff <= 37 ? "A tiempo" : "Retardado";
+            group[i + 1].diff = diff;
+            group[i + 1].delay = diff > 37 ? diff - 37 : 0;
+          }
+          if (group[i].fiscal == "Panaderia" && group[i + 1]?.fiscal == "Riberas") {
+            const time1 = convertToMinutes(group[i].hora_servidor);
+            const time2 = convertToMinutes(group[i + 1].hora_telefono);
+            const diff = time2 - time1;
+            group[i + 1].onTime = diff <= 15;
+            group[i + 1].onTimeText = diff <= 15 ? "A tiempo" : "Retardado";
+            group[i + 1].diff = diff;
+            group[i + 1].delay = diff > 15 ? diff - 15 : 0;
+          }
+          if (group[i].fiscal == "Terminal" && group[i + 2]?.fiscal == "3 esquinas") {
+            const time1 = convertToMinutes(group[i].hora_servidor);
+            const time2 = convertToMinutes(group[i + 2].hora_telefono);
+            const diff = time2 - time1;
+            group[i + 2].onTime = diff <= 45;
+            group[i + 2].onTimeText = diff <= 45 ? "A tiempo" : "Retardado";
+            group[i + 2].diff = diff;
+            group[i + 2].delay = diff > 45 ? diff - 45 : 0;
+          }
+          if (group[i].fiscal == 'Barrancas' && group[i + 1]?.fiscal == 'Panaderia') {
+            const time1 = convertToMinutes(group[i].hora_servidor);
+            const time2 = convertToMinutes(group[i + 1].hora_telefono);
+            const diff = time2 - time1;
+            const isBefore8am = time1 < 8 * 60; // 8am in minutes
+            const threshold = isBefore8am ? 12 : 14;
+            group[i + 1].onTime = diff <= threshold;
+            group[i + 1].onTimeText = diff <= threshold ? "A tiempo" : "Retardado";
+            group[i + 1].diff = diff;
+            group[i + 1].delay = diff > threshold ? diff - threshold : 0;
+          }
+          if (group[i].fiscal == "Terminal" && group[i + 1]?.fiscal == "3 esquinas") {
+            const time1 = convertToMinutes(group[i].hora_servidor);
+            const time2 = convertToMinutes(group[i + 1].hora_telefono);
+            const diff = time2 - time1;
+            group[i + 1].onTime = diff <= 45;
+            group[i + 1].onTimeText = diff <= 45 ? "A tiempo" : "Retardado";
+            group[i + 1].diff = diff;
+            group[i + 1].delay = diff > 45 ? diff - 45 : 0;
+          }
+          if (group[i].fiscal == "Terminal" && group[i + 2]?.fiscal == "Panaderia") {
+            const time1 = convertToMinutes(group[i].hora_servidor);
+            const time2 = convertToMinutes(group[i + 2].hora_telefono);
+            const diff = time2 - time1;
+            group[i + 2].onTime = diff <= 47;
+            group[i + 2].onTimeText = diff <= 47 ? "A tiempo" : "Retardado";
+            group[i + 2].diff = diff;
+            group[i + 2].delay = diff > 47 ? diff - 47 : 0;
+          }
+          if (group[i].fiscal == "Terminal" && group[i + 1]?.fiscal == "Panaderia") {
+            const time1 = convertToMinutes(group[i].hora_servidor);
+            const time2 = convertToMinutes(group[i + 1].hora_telefono);
+            const diff = time2 - time1;
+            group[i + 1].onTime = diff <= 47;
+            group[i + 1].onTimeText = diff <= 47 ? "A tiempo" : "Retardado";
+            group[i + 1].diff = diff;
+            group[i + 1].delay = diff > 47 ? diff - 47 : 0;
+          }
+        }
+
+        const sorted = {
+          title: key,
+          group,
+        }
+        sortedRegistros.push(sorted)
+      }
+
+
+    });
+    return sortedRegistros;
+  };
 
   // Función para filtrar registros retardados
   const getRegistrosRetardados = (registrosOrdenados: any[]): any[] => {
@@ -640,7 +688,7 @@ let columns2 = [
     );
   };
 
-    // Llamar a la función de comparación
+  // Llamar a la función de comparación
   const registrosOrdenados = useMemo(() => {
     console.time("Ordenamiento de registros");
     const orderedRegistros = compareTimestamps(setTimestamps);
@@ -657,7 +705,7 @@ let columns2 = [
   }, [registrosOrdenados]);
 
 
-    //descargar imagenes
+  //descargar imagenes
   const [selectedRegistro, setSelectedRegistro] = useState<any[]>()
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const hiddenContainerRef = useRef<HTMLDivElement | null>(null);
@@ -697,10 +745,10 @@ let columns2 = [
       cardClone.style.height = 'auto';
       cardClone.style.overflow = 'visible';
       // Añadir el clon al contenedor oculto
-        if (hiddenContainerRef.current) {
-          hiddenContainerRef.current.appendChild(cardClone)
-        }
-      
+      if (hiddenContainerRef.current) {
+        hiddenContainerRef.current.appendChild(cardClone)
+      }
+
 
       // Usar requestAnimationFrame para mejorar el rendimiento
       requestAnimationFrame(async () => {
@@ -793,10 +841,41 @@ let columns2 = [
     cardRefs.current = cardRefs.current.slice(0, registrosOrdenados.length);
   }, [registrosOrdenados]);
 
+  // Flatten delayed records for simple list table
+  const listaRetardados = registrosRetardados.flatMap(registro =>
+    registro.group.filter((item: { onTime: boolean; }) => item.onTime === false)
+  );
+
+  // Aggregate fiscal point counts
+  const datosParaTabla = setTimestamps.reduce((acumulador, timestamp) => {
+    const fiscal = timestamp.fiscal;
+
+    // Check if fiscal already exists in accumulator
+    const fiscalExistente = acumulador.find((item: { Fiscal: any; }) => item.Fiscal === fiscal);
+
+    if (fiscalExistente) {
+      // If exists, increment counter
+      fiscalExistente.cantidad++;
+    } else {
+      // If first time seeing this fiscal, add it with count 1
+      acumulador.push({
+        Fiscal: fiscal,
+        cantidad: 1,
+      });
+    }
+
+    return acumulador;
+  }, []);
+
+  // PDF download hooks
+  const { toPDF, targetRef } = usePDF({ filename: `retardados${fecha}` });
+  const { toPDF: toPDFPuntos, targetRef: targetRefPuntos } = usePDF({ filename: `puntos${fecha}` });
+
+
   return (
     <div>
       <div ref={hiddenContainerRef} style={{ position: 'absolute', top: '-9999px', left: '-9999px', width: 'auto', height: 'auto', overflow: 'hidden' }}></div>
-     <section className="flex flex-col items-center justify-center gap-4">
+      <section className="flex flex-col items-center justify-center gap-4">
         <div className="inline-block max-w-xl text-center justify-center">
           <h1 className="text-2xl font-bold">Horarios Fiscales</h1>
         </div>
@@ -917,21 +996,21 @@ let columns2 = [
                 <Button onPress={toggleColumns} className="bg-sky-600 font-bold">
                   {showTrapColumn ? "Ocultar" : "Mostrar"}
                 </Button>
-                {todayDate.fecha == fecha ?(
+                {todayDate.fecha == fecha ? (
                   <>
-                  {loading ? <Button className="bg-sky-600 font-bold cursor-default">
-                    Cargando...
+                    {loading ? <Button className="bg-sky-600 font-bold cursor-default">
+                      Cargando...
                     </Button> : <Button onPress={fetchData} className="bg-sky-600 font-bold">
-                  Refrescar registros
-                </Button>}
-                </>
-                ):''}
+                      Refrescar registros
+                    </Button>}
+                  </>
+                ) : ''}
 
                 <Button onPress={() => setShowOrden(!showOrden)} className="bg-sky-600 font-bold">
                   {showOrden ? "Ocultar Registros Ordenados" : "Mostrar Registros Ordenados"}
                 </Button>
                 {showOrden ? <Button onPress={() => setMostrarRetardados(!mostrarRetardados)} className="bg-sky-600 font-bold"> {mostrarRetardados ? "Todos los Registros" : "Solo Retardados"}</Button> : ''}
-                {showOrden && mostrarRetardados ? <Button onPress={handleDownloadAllRetardados} className = "bg-sky-600 font-bold">Imprimir PDF</Button> : ''}
+                {showOrden && mostrarRetardados ? <Button onPress={handleDownloadAllRetardados} className="bg-sky-600 font-bold">Imprimir PDF</Button> : ''}
                 {/* <Button onPress={generatePDF} className="bg-sky-600 font-bold">
                  Imprimir Retardados
                 </Button> */}
@@ -939,52 +1018,52 @@ let columns2 = [
             </CardBody>
           </Card>
         </div>
-     </section>
-     {showOrden && <section className='flex flex-col items-center justify-center gap-4'>
+      </section>
+      {showOrden && <section className='flex flex-col items-center justify-center gap-4'>
         <h1 className="text-xl font-bold mt-4">Registros ordenados</h1>
         <div className={`p-5 grid grid-cols-1 ${mostrarRetardados ? 'sm:grid-cols-1' : 'sm:grid-cols-2'} gap-4 `}>
           {mostrarRetardados ? registrosRetardados && registrosRetardados.map((registro: any, index: number) => (
             <Card className='relative' key={registro.title} ref={el => { cardRefs.current[index] = el; }}>
-                  <CardHeader>
-              <Button
-                onPress={() => handleDownloadImage(index, registro.title)}
-                className="absolute top-2 right-2 bg-blue-500 text-white p-1 rounded"
-              >
-                Descargar
-              </Button>
-                    <h1 className="font-bold text-lg">{registro.title}</h1>
-                  </CardHeader>
-                  <Divider/>
-                  <CardBody className='h-72'>
+              <CardHeader>
+                <Button
+                  onPress={() => handleDownloadImage(index, registro.title)}
+                  className="absolute top-2 right-2 bg-blue-500 text-white p-1 rounded"
+                >
+                  Descargar
+                </Button>
+                <h1 className="font-bold text-lg">{registro.title}</h1>
+              </CardHeader>
+              <Divider />
+              <CardBody className='h-72'>
                 <Table aria-label={`Tabla de ${registro.title}`}>
                   <TableHeader columns={currentColumns} aria-label="Tabla">
-                        {(column) => (
-                          <TableColumn key={column.key}>{column.label}</TableColumn>
-                        )}
-                      </TableHeader>
+                    {(column) => (
+                      <TableColumn key={column.key}>{column.label}</TableColumn>
+                    )}
+                  </TableHeader>
                   <TableBody items={registro.group} aria-label="Tabla" >
-                        {(item) => (
-                          <TableRow key={(item as any).key} className={classNames('rounded', {
-                            "bg-red-700": (item as any).onTime === false,
-                          })}
+                    {(item) => (
+                      <TableRow key={(item as any).key} className={classNames('rounded', {
+                        "bg-red-700": (item as any).onTime === false,
+                      })}
                         aria-label="Tabla">
-                            {(columnKey) => (
-                              <TableCell>
-                                {/* <Link href={`/registros/${item.key}`}> */}
-                                {getKeyValue(item, columnKey)}
-                                {/* </Link> */}
-                              </TableCell>
-                            )}
-                          </TableRow>
+                        {(columnKey) => (
+                          <TableCell>
+                            {/* <Link href={`/registros/${item.key}`}> */}
+                            {getKeyValue(item, columnKey)}
+                            {/* </Link> */}
+                          </TableCell>
                         )}
-                      </TableBody>
-                    </Table>
-                  </CardBody>
-                </Card>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardBody>
+            </Card>
           )) : registrosOrdenados && registrosOrdenados.map((registro: any, index: number) => (
             <Card className='relative' key={registro.title} ref={el => { cardRefs.current[index] = el; }}>
               <CardHeader>
-               {mostrarRetardados && <Button
+                {mostrarRetardados && <Button
                   onPress={() => handleDownloadImage(index, registro.title)}
                   className="absolute top-2 right-2 bg-blue-500 text-white p-1 rounded"
                 >
@@ -1022,11 +1101,76 @@ let columns2 = [
           ))}
         </div>
       </section>}
+
+      {/* lista de retardados */}
+
+      <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10 px-4 sm:px-6 lg:px-8 xl:px-12">
+        <h1 className="text-xl font-bold">Lista de Retardados</h1>
+        <Button onPress={() => toPDF()} className="bg-sky-600 font-bold">Descargar PDF</Button>
+        {listaRetardados.length > 0 ? (
+          <Table ref={targetRef} className='max-w-3xl' aria-label="Example table with dynamic content">
+            <TableHeader columns={columns2} aria-label="Tabla">
+              {(column) => (
+                <TableColumn key={column.key}>{column.label}</TableColumn>
+              )}
+            </TableHeader>
+            <TableBody items={listaRetardados} aria-label="Tabla">
+              {(item) => (
+                <TableRow
+                  key={(item as any).key}
+                  className={classNames("rounded")}
+                  aria-label="Tabla"
+                >
+                  {(columnKey) => (
+                    <TableCell>
+                      {getKeyValue(item, columnKey)}
+                    </TableCell>
+                  )}
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        ) : (
+          <p>No hay Retardados</p>
+        )}
+      </section>
+
+      <section className="w-1/3 max-w-4xl mx-auto flex flex-col items-center justify-center gap-4 py-8 md:py-10 px-4 sm:px-6 lg:px-8">
+        <h1 className='text-xl font-bold'>Control de puntos</h1>
+        <Button onPress={() => toPDFPuntos()} className="bg-sky-600 font-bold">Descargar PDF</Button>
+        {datosParaTabla.length > 0 ? (
+          <Table ref={targetRefPuntos} className='max-w-3xl' aria-label="Example table with dynamic content">
+            <TableHeader columns={columnsFisc} aria-label="Tabla">
+              {(column) => (
+                <TableColumn key={column.key}>{column.label}</TableColumn>
+              )}
+            </TableHeader>
+            <TableBody items={datosParaTabla} aria-label="Tabla">
+              {(item) => (
+                <TableRow
+                  key={`${(item as any).fiscal}`}
+                  className={classNames("rounded")}
+                  aria-label="Tabla"
+                >
+                  {(columnKey) => (
+                    <TableCell>
+                      {getKeyValue(item, columnKey)}
+                    </TableCell>
+                  )}
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        ) : (
+          <p>No hay Registros</p>
+        )}
+      </section>
+
       <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-       
+
         {/* body*/}
-          
-          <h1 className="text-xl font-bold ">Registros diarios</h1>
+
+        <h1 className="text-xl font-bold ">Registros diarios</h1>
         <div className={classNames("grid grid-cols-1 md:grid-cols-3 gap-4")}>
           <div
             className={classNames("flex gap-3", {
@@ -1034,15 +1178,15 @@ let columns2 = [
               "col-span-3": !ruta,
             })}
           >
-            <Table  aria-label="Example table with dynamic content">
+            <Table aria-label="Example table with dynamic content">
               <TableHeader columns={columns}>
                 {(column) => (
                   <TableColumn key={column.key}>{column.label}</TableColumn>
                 )}
               </TableHeader>
-              <TableBody items={showRows?rows:[]}>
+              <TableBody items={showRows ? rows : []}>
                 {(item) => (
-                  <TableRow key={item.key} className={classNames('rounded',{
+                  <TableRow key={item.key} className={classNames('rounded', {
                     "bg-red-700": item.onTime === false,
                   })}>
                     {(columnKey) => (
@@ -1058,7 +1202,7 @@ let columns2 = [
             </Table>
           </div>
           {/* mostrar registros ordenados */}
-     
+
         </div>
       </section>
       <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
@@ -1066,36 +1210,36 @@ let columns2 = [
           <h1 className="text-xl font-bold">Lista de Unidades</h1>
           <div>
             <Card>
-                <CardBody className='flex flex-row gap-4'>
+              <CardBody className='flex flex-row gap-4'>
                 <ul className="flex flex-wrap gap-2">
-                      {unidadesordenadas && unidadesordenadas.map((unidad: any) => (
-                        <li key={unidad}>{unidad}</li>
-                      ))}
-                    </ul>
-                </CardBody>
-            </Card> 
+                  {unidadesordenadas && unidadesordenadas.map((unidad: any) => (
+                    <li key={unidad}>{unidad}</li>
+                  ))}
+                </ul>
+              </CardBody>
+            </Card>
           </div>
         </div>
       </section>
-        {!isAtTop && (
-      <div className=" fixed bottom-4 right-4 z-50">
-        {todayDate.fecha==fecha ?(
-          <>
-          {loading ? <Button className="bg-red-600 font-bold p-4 rounded-full shadow-lg cursor-default">
-            Cargando...
-            </Button> :  <Button onPress={fetchData} className="bg-red-600 font-bold p-4 rounded-full shadow-lg">
-       Refrescar registros
-        </Button>
-        }
-          </>
-            )
-        : ''}
+      {!isAtTop && (
+        <div className=" fixed bottom-4 right-4 z-50">
+          {todayDate.fecha == fecha ? (
+            <>
+              {loading ? <Button className="bg-red-600 font-bold p-4 rounded-full shadow-lg cursor-default">
+                Cargando...
+              </Button> : <Button onPress={fetchData} className="bg-red-600 font-bold p-4 rounded-full shadow-lg">
+                Refrescar registros
+              </Button>
+              }
+            </>
+          )
+            : ''}
           <Button onPress={scrollUp} className="bg-sky-600 font-bold p-4 rounded-full shadow-lg m-4">
             Subir
             <ScrollUpIcon />
           </Button>
-      </div>
-        )}
+        </div>
+      )}
     </div>
   );
 }
