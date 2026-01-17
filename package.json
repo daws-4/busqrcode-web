@@ -6,7 +6,7 @@
   "dev": "next dev --turbo",
   "build": "next build",
   "start": "next start",
-  "lint": "eslint . --ext .ts,.tsx -c .eslintrc.json --fix"
+  "lint": "eslint ."
  },
  "dependencies": {
   "@heroui/button": "2.2.10",
@@ -45,6 +45,8 @@
   "react-toastify": "^10.0.6"
  },
  "devDependencies": {
+  "@eslint/eslintrc": "^3.3.3",
+  "@eslint/js": "^9.39.2",
   "@types/bcryptjs": "^2.4.6",
   "@types/jsonwebtoken": "^9.0.7",
   "@types/node": "20.5.7",
@@ -62,8 +64,9 @@
   "eslint-plugin-node": "^11.1.0",
   "eslint-plugin-prettier": "5.2.1",
   "eslint-plugin-react": "^7.23.2",
-  "eslint-plugin-react-hooks": "^4.6.0",
+  "eslint-plugin-react-hooks": "^5.1.0-rc.0",
   "eslint-plugin-unused-imports": "4.1.4",
+  "globals": "^17.0.0",
   "postcss": "8.4.38",
   "prettier": "3.3.3",
   "tailwind-variants": "0.1.20",
