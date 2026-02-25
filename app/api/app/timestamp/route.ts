@@ -2,8 +2,21 @@ import { connectDB } from "@/libs/db";
 import timestamps from "@/models/timestamps";
 import fiscales from "@/models/fiscales";
 import { NextResponse } from "next/server";
+import { unstable_cache } from "next/cache";
 
 connectDB();
+
+// Cachear la lista de fiscales por 5 minutos — son datos estáticos que
+// se consultan en cada POST pero raramente cambian
+const getFiscalesCached = unstable_cache(
+  async () => {
+    await connectDB();
+    return fiscales.find().lean();
+  },
+  ["fiscales-list"],
+  { revalidate: 57600 } // 16 horas — los fiscales raramente cambian
+);
+
 
 export async function POST(request: any) {
   const {
@@ -103,8 +116,8 @@ export async function POST(request: any) {
     );
     console.log(unidTimestamps[0], "Unidad anterior de la misma ruta");
 
-    // Buscar el fiscal con ubicación 'Terminal' o 'Barrancas'
-    const findFiscales = await fiscales.find();
+    // Usar fiscales desde caché en vez de consultar MongoDB en cada petición
+    const findFiscales = await getFiscalesCached();
     const terminalFiscal = findFiscales.find(
       (fiscal) => fiscal.ubicacion === "Terminal"
     );
