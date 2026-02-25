@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import {connectDB} from "@/libs/db";
+import { connectDB } from "@/libs/db";
 import timestamps from "@/models/timestamps";
 import moment from "moment-timezone";
 connectDB();
@@ -28,7 +28,7 @@ export async function POST(request: any) {
         $gte: startOfDayUTC,
         $lte: endOfDayUTC,
       },
-    });
+    }).lean();
     //id_fiscal : ObjectId('672ba1914234ebf7a715124f')
     // console.log(registrosDeHoy);
     // console.log(fecha);

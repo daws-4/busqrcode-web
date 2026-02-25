@@ -155,7 +155,19 @@ export default function Index({
     }
   };
   useEffect(() => {
+    // Carga inicial al montar o al cambiar de fecha
     fetchData();
+
+    // Auto-refresh cada 60 segundos sin recargar la página completa
+    // Solo aplica si la fecha seleccionada es hoy (no tiene sentido refrescar fechas pasadas)
+    const todayStr = getTodayDate().fecha;
+    if (fecha === todayStr) {
+      const interval = setInterval(() => {
+        fetchData();
+      }, 60_000);
+      return () => clearInterval(interval);
+    }
+    return () => { }; // No hay intervalo que limpiar para fechas pasadas
   }, [fecha]);
 
   const formatDate = (dateString: string) => {
